@@ -23,6 +23,8 @@ function ProductForm({
 }) {
   const [formData, setFormData] = useState(() => createInitialForm(product));
   const [previewUrl, setPreviewUrl] = useState(() => product?.image ?? "");
+  const [previewError, setPreviewError] = useState(false);
+  const [imageError, setImageError] = useState("");
 
   function updateField(event) {
     const { name, value } = event.target;
@@ -31,6 +33,8 @@ function ProductForm({
 
     if (name === "imageUrl" && !formData.imageFile) {
       setPreviewUrl(value);
+      setPreviewError(false);
+      setImageError("");
     }
   }
 
@@ -38,13 +42,25 @@ function ProductForm({
     const imageFile = event.target.files?.[0] ?? null;
     event.target.value = "";
 
-    if (imageFile) {
-      const reader = new FileReader();
-      reader.onload = () => setPreviewUrl(reader.result);
-      reader.readAsDataURL(imageFile);
-    } else {
-      setPreviewUrl(formData.imageUrl);
+    if (!imageFile) return;
+
+    if (!imageFile.type.startsWith("image/")) {
+      setImageError("Choose an image file, such as JPG, PNG, GIF, or WebP.");
+      return;
     }
+
+    if (imageFile.size > 5 * 1024 * 1024) {
+      setImageError("This image is larger than 5 MB. Choose a smaller image.");
+      return;
+    }
+
+    setImageError("");
+    const reader = new FileReader();
+    reader.onload = () => {
+      setPreviewUrl(reader.result);
+      setPreviewError(false);
+    };
+    reader.readAsDataURL(imageFile);
 
     setFormData((current) => ({ ...current, imageFile }));
   }
@@ -52,6 +68,8 @@ function ProductForm({
   function removeImageFile() {
     setFormData((current) => ({ ...current, imageFile: null }));
     setPreviewUrl(formData.imageUrl);
+    setPreviewError(false);
+    setImageError("");
   }
 
   function handleSubmit(event) {
@@ -76,34 +94,27 @@ function ProductForm({
 
   return (
     <form onSubmit={handleSubmit}>
-      <section className="mb-6 rounded-xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-800 dark:bg-gray-900 sm:p-6">
-        <div className="mb-6 flex items-start justify-between gap-4">
+      <section className="mb-4 rounded-xl border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-800 dark:bg-gray-900 sm:mb-6 sm:p-6">
+        <div className="mb-3 flex items-start justify-between gap-3 sm:mb-6 sm:gap-4">
           <div>
             <p className="text-sm font-medium text-emerald-700 dark:text-emerald-400">
-              Product information
+              Product details
             </p>
             <h2 className="mt-1 text-xl font-bold text-gray-900 dark:text-white">
-              {product ? "Edit product" : "Add new product"}
+              {product ? "Update product details" : "Add a product"}
             </h2>
             <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-              Add the details customers need to find this item.
+              Enter the product name, price, and stock quantity. Add a description or image if useful.
             </p>
           </div>
 
-          <button
-            type="button"
-            onClick={onCancel}
-            className="rounded-lg border border-gray-200 px-3 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-50 dark:border-gray-700 dark:text-gray-200 dark:hover:bg-gray-800"
-          >
-            Cancel
-          </button>
         </div>
 
-        <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+        <div className="grid grid-cols-1 gap-3 md:grid-cols-2 md:gap-5">
           <div className="md:col-span-2">
             <label
               htmlFor="productName"
-              className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300"
+              className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300 sm:mb-2"
             >
               Product name <span className="text-red-500">*</span>
             </label>
@@ -123,7 +134,7 @@ function ProductForm({
           <div className="md:col-span-2">
             <label
               htmlFor="productDescription"
-              className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300"
+              className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300 sm:mb-2"
             >
               Description
             </label>
@@ -132,16 +143,16 @@ function ProductForm({
               name="description"
               value={formData.description}
               onChange={updateField}
-              rows={4}
+              rows={3}
               placeholder="Describe the product and its key features"
-              className="w-full resize-y rounded-lg border border-gray-300 bg-white px-3.5 py-2.5 text-sm text-gray-900 outline-none transition placeholder:text-gray-400 focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 dark:focus:ring-emerald-900"
+              className="w-full min-h-20 resize-y rounded-lg border border-gray-300 bg-white px-3.5 py-2.5 text-sm text-gray-900 outline-none transition placeholder:text-gray-400 focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 dark:focus:ring-emerald-900 sm:min-h-24"
             />
           </div>
 
           <div>
             <label
               htmlFor="productCategory"
-              className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300"
+              className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300 sm:mb-2"
             >
               Category
             </label>
@@ -160,7 +171,7 @@ function ProductForm({
             <div>
               <label
                 htmlFor="productPrice"
-                className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300"
+                className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300 sm:mb-2"
               >
                 Price <span className="text-red-500">*</span>
               </label>
@@ -187,7 +198,7 @@ function ProductForm({
             <div>
               <label
                 htmlFor="productStock"
-                className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300"
+                className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300 sm:mb-2"
               >
                 Stock <span className="text-red-500">*</span>
               </label>
@@ -210,7 +221,7 @@ function ProductForm({
           <div className="md:col-span-2">
             <label
               htmlFor="productImageUrl"
-              className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300"
+              className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300 sm:mb-2"
             >
               Image URL <span className="font-normal text-gray-400">(optional)</span>
             </label>
@@ -228,49 +239,63 @@ function ProductForm({
           <div className="md:col-span-2">
             <label
               htmlFor="productImageFile"
-              className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300"
+              className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300 sm:mb-2"
             >
               Or upload an image <span className="font-normal text-gray-400">(optional, max 5 MB)</span>
             </label>
-            <div className="flex flex-col gap-4 rounded-lg border border-dashed border-gray-300 bg-gray-50 p-4 dark:border-gray-700 dark:bg-gray-800/60 sm:flex-row sm:items-center">
-              {previewUrl ? (
+            <div className="flex flex-row items-center gap-3 rounded-lg border border-dashed border-gray-300 bg-gray-50 p-2 dark:border-gray-700 dark:bg-gray-800/60 sm:gap-4 sm:p-4">
+              {previewUrl && !previewError ? (
                 <img
                   src={previewUrl}
                   alt="Product preview"
-                  className="h-24 w-28 rounded-md bg-white object-cover dark:bg-gray-900"
+                  className="h-16 w-16 shrink-0 rounded-md bg-white object-contain sm:h-24 sm:w-28"
+                  onError={() => setPreviewError(true)}
+                  onLoad={() => setPreviewError(false)}
                 />
               ) : (
-                <div className="flex h-24 w-28 shrink-0 items-center justify-center rounded-md bg-gray-100 text-gray-400 dark:bg-gray-800 dark:text-gray-500">
-                  <ImagePlus size={28} />
+                <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-md bg-gray-100 text-gray-400 dark:bg-gray-800 dark:text-gray-500 sm:h-24 sm:w-28">
+                  <ImagePlus size={24} />
                 </div>
               )}
-              <label
-                htmlFor="productImageFile"
-                className="inline-flex cursor-pointer items-center justify-center gap-2 self-start rounded-lg border border-gray-300 bg-white px-3.5 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-100 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200 dark:hover:bg-gray-800"
-              >
-                <UploadCloud size={17} />
-                Choose image
-                <input
-                  id="productImageFile"
-                  type="file"
-                  accept="image/*"
-                  onChange={updateImage}
-                  className="sr-only"
-                />
-              </label>
-              <div className="min-w-0">
-                <p className="truncate text-sm text-gray-500 dark:text-gray-400">
-                  {formData.imageFile?.name || "PNG, JPG, GIF, or WebP"}
-                </p>
-                {formData.imageFile && (
-                  <button
-                    type="button"
-                    onClick={removeImageFile}
-                    className="mt-1 text-xs font-medium text-red-600 underline underline-offset-2 dark:text-red-400"
-                  >
-                    Remove uploaded file
-                  </button>
-                )}
+              <div className="min-w-0 flex-1">
+                <label
+                  htmlFor="productImageFile"
+                  className="inline-flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-100 focus-within:ring-2 focus-within:ring-emerald-600 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200 dark:hover:bg-gray-800"
+                >
+                  <UploadCloud size={17} />
+                  Choose image
+                  <input
+                    id="productImageFile"
+                    type="file"
+                    accept="image/*"
+                    onChange={updateImage}
+                    className="sr-only"
+                  />
+                </label>
+                <div className="mt-1 min-w-0">
+                  <p className="truncate text-sm text-gray-500 dark:text-gray-400">
+                    {formData.imageFile?.name || "PNG, JPG, GIF, or WebP"}
+                  </p>
+                  {previewError && (
+                    <p className="mt-1 text-xs text-amber-700 dark:text-amber-400">
+                      Preview unavailable. Check the image URL or choose another image.
+                    </p>
+                  )}
+                  {imageError && (
+                    <p className="mt-1 text-xs text-red-600 dark:text-red-400" role="alert">
+                      {imageError}
+                    </p>
+                  )}
+                  {formData.imageFile && (
+                    <button
+                      type="button"
+                      onClick={removeImageFile}
+                      className="mt-1 text-xs font-medium text-red-600 underline underline-offset-2 dark:text-red-400"
+                    >
+                      Remove uploaded file
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
           </div>
@@ -282,18 +307,18 @@ function ProductForm({
           </p>
         )}
 
-        <div className="mt-6 flex flex-col-reverse gap-3 border-t border-gray-100 pt-5 dark:border-gray-800 sm:flex-row sm:justify-end">
+        <div className="mt-4 flex border-t border-gray-100 pt-4 dark:border-gray-800 sm:mt-6 sm:justify-end sm:gap-3 sm:pt-5">
           <button
             type="button"
             onClick={onCancel}
-            className="rounded-lg border border-gray-300 px-5 py-2.5 text-sm font-semibold text-gray-700 transition hover:bg-gray-50 dark:border-gray-700 dark:text-gray-200 dark:hover:bg-gray-800"
+            className="hidden min-h-11 rounded-lg border border-gray-300 px-5 py-2.5 text-sm font-semibold text-gray-700 transition hover:bg-gray-50 dark:border-gray-700 dark:text-gray-200 dark:hover:bg-gray-800 sm:inline-flex"
           >
             Cancel
           </button>
           <button
             type="submit"
             disabled={isSubmitting}
-            className="rounded-lg bg-emerald-700 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-emerald-800 disabled:cursor-not-allowed disabled:opacity-60"
+            className="min-h-11 w-full rounded-lg bg-emerald-700 px-3 py-2 text-sm font-semibold text-white transition hover:bg-emerald-800 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto sm:px-5 sm:py-2.5"
           >
             {isSubmitting ? "Saving..." : submitLabel}
           </button>

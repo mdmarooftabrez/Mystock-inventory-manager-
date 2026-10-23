@@ -1,8 +1,24 @@
 # MyStock
 
-MyStock is a product storage and inventory app. You can create an account, add products, edit and delete products, and keep track of stock.
+MyStock is a product storage and inventory app. You can create an account, add products, edit and delete your own products, and keep track of stock.
 
 The frontend uses React. The API uses Express and PostgreSQL.
+
+## Screenshots
+
+### Dashboard
+
+![MyStock dashboard](docs/screenshots/dashboard.png)
+
+### Products
+
+![MyStock product list](docs/screenshots/products.png)
+
+### Product details
+
+![MyStock product details](docs/screenshots/product-details.png)
+
+Screenshots use sample inventory data.
 
 ## Run it on your computer
 
@@ -30,6 +46,8 @@ You need Node.js, npm, and a Neon database.
 5. Open the Vite address shown in the terminal, usually `http://localhost:5173`, and create an account.
 
 The API creates the database tables when it starts. You can add an image URL without setting up image uploads. To upload image files, add an ImageKit private key to the backend environment.
+
+Each product belongs to the account that created it. On an existing database, the startup migration assigns older shared products to the oldest account so other accounts no longer see them. The API allows up to 120 requests per IP every 15 minutes, with a separate limit of 10 login or registration attempts per IP in the same window. These limits use in-memory storage and reset when the API restarts.
 
 ## Environment settings
 
@@ -60,7 +78,7 @@ When `DATABASE_URL` has a value, the backend uses it instead of the local `DB_*`
 
 ## Deploy
 
-Push the project to GitHub, then create two services on Render.
+Push the project to GitHub, then deploy the API to Render and the frontend to Vercel.
 
 ### Backend
 
@@ -75,23 +93,23 @@ Add these environment variables in Render:
 - `NODE_ENV` = `production`
 - `DATABASE_URL` = your Neon connection string
 - `JWT_SECRET` = a long, random secret
-- `FRONTEND_URL` = the frontend's Render URL
 - `IMAGEKIT_PRIVATE_KEY` = optional, only needed for image uploads
 
 Render sets `PORT` automatically. Check the service logs to confirm the backend started.
 
 ### Frontend
 
-Create a **Static Site** and set:
+Import the same GitHub repository into Vercel and set:
 
 - Root Directory: `frontend/vite-project`
-- Build Command: `npm ci && npm run build`
-- Publish Directory: `dist`
-- Environment Variable: `VITE_API_URL` = the backend URL followed by `/api`
+- Framework Preset: `Vite`
+- Build Command: `npm run build`
+- Output Directory: `dist`
+- Environment Variable: `VITE_API_URL` = the Render backend URL followed by `/api`, such as `https://your-mystock-api.onrender.com/api`
 
-In **Redirects/Rewrites**, add a rule with source `/*`, destination `/index.html`, and action `Rewrite`. This lets React Router load pages such as `/products` after refresh.
+The included `vercel.json` rewrite sends React Router paths back to the app, so pages such as `/products` continue to work when opened directly or refreshed.
 
-After the frontend deploys, set the backend's `FRONTEND_URL` to the frontend URL and redeploy the backend. Keep database passwords and secret keys out of GitHub. Both deployed services use HTTPS, which is needed for login cookies.
+After Vercel assigns a URL, add `FRONTEND_URL` to the Render backend using that exact URL, then redeploy the backend so browser requests are allowed. If you use a custom domain, set `FRONTEND_URL` to that domain instead. Keep database passwords and secret keys out of GitHub. Both deployed services use HTTPS, which is needed for login cookies.
 
 ## Project files
 
@@ -101,7 +119,9 @@ After the frontend deploys, set the backend's `FRONTEND_URL` to the frontend URL
 - `src/context/` shares the signed-in user and product list with the pages.
 - `src/pages/` contains the dashboard, login, registration, and product screens.
 - `src/components/` contains the shared page layout and product form/card.
-- `src/api/api.js` sends requests to the backend.
+- `src/api/api.js` sends requests to the backend and handles API errors.
+- `src/hooks/useProduct.js` shares product loading between the details and edit pages.
+- `src/utils/product.js` converts product data from the API into the frontend format.
 
 ### Backend
 

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import API_URL from "../api/api";
+import { apiRequest } from "../api/api";
 import AuthContext from "./auth-context";
 
 export function AuthProvider({ children }) {
@@ -7,58 +7,50 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch(`${API_URL}/auth/me`, { credentials: "include" })
-      .then((response) => response.json())
-      .then((data) => setUser(data.user))
-      .catch(() => setUser(null))
-      .finally(() => setLoading(false));
-  }, []);
+    let isCurrent = true;
 
-  async function login(email, password) {
-    const response = await fetch(`${API_URL}/auth/login`, {
-      method: "POST",
-      credentials: "include",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password }),
-    });
-    const data = await response.json();
-
-    if (!response.ok) {
-      throw new Error(data.message || "Could not log in.");
+    async function loadUser() {
+      try {
+        const data = await apiRequest("/auth/me");
+        if (isCurrent) setUser(data.user || null);
+      } catch (error) {
+        if (error.status !== 401) {
+          console.error("Could not load your account:", error.message);
+        }
+        if (isCurrent) setUser(null);
+      } finally {
+        if (isCurrent) setLoading(false);
+      }
     }
 
+    loadUser();
+    return () => {
+      isCurrent = false;
+    };
+  }, []);
+
+  async function authenticate(path, body) {
+    const data = await apiRequest(path, { method: "POST", body });
     setUser(data.user);
     return data.user;
   }
 
-  async function register(name, email, password) {
-    const response = await fetch(`${API_URL}/auth/register`, {
-      method: "POST",
-      credentials: "include",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, email, password }),
-    });
-    const data = await response.json();
+  function login(email, password) {
+    return authenticate("/auth/login", { email, password });
+  }
 
-    if (!response.ok) {
-      throw new Error(data.message || "Could not create your account.");
-    }
-
-    setUser(data.user);
-    return data.user;
+  function register(name, email, password) {
+    return authenticate("/auth/register", { name, email, password });
   }
 
   async function logout() {
     try {
-      await fetch(`${API_URL}/auth/logout`, {
-        method: "POST",
-        credentials: "include",
-      });
+      await apiRequest("/auth/logout", { method: "POST" });
     } catch (error) {
       console.error("Could not log out:", error.message);
+    } finally {
+      setUser(null);
     }
-
-    setUser(null);
   }
 
   return (

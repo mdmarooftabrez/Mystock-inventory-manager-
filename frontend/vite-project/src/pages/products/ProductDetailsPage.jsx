@@ -1,7 +1,7 @@
-import { useContext, useEffect, useState } from "react";
+import { useContext, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { ArrowLeft, CalendarDays, Layers3, Package, Pencil, Trash2 } from "lucide-react";
-import API_URL from "../../api/api";
+import { useProduct } from "../../hooks/useProduct";
 import ProductContext from "../../context/product-context";
 
 const currency = new Intl.NumberFormat("en-US", {
@@ -13,69 +13,20 @@ function formatDate(value) {
   if (!value) return "—";
 
   const date = new Date(value);
-  return Number.isNaN(date.getTime())
-    ? "—"
-    : new Intl.DateTimeFormat(undefined, { dateStyle: "medium" }).format(date);
+  if (Number.isNaN(date.getTime())) {
+    return "—";
+  }
+
+  return new Intl.DateTimeFormat(undefined, { dateStyle: "medium" }).format(date);
 }
 
 function ProductDetailsPage() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { deleteProduct, deletingId } = useContext(ProductContext);
-  const [request, setRequest] = useState({ id: null, product: null, error: "" });
+  const { product, error, loading } = useProduct(id);
   const [actionError, setActionError] = useState("");
-  const product = request.id === id ? request.product : null;
-  const loading = request.id !== id;
-  const error = request.id === id ? request.error : "";
   const isDeleting = deletingId === String(id);
-
-  useEffect(() => {
-    let isCurrentRequest = true;
-
-    async function loadProduct() {
-      try {
-        const response = await fetch(`${API_URL}/products/${id}`, {
-          credentials: "include",
-        });
-        const data = await response.json();
-
-        if (!response.ok) {
-          throw new Error(data.message || "Could not load this product.");
-        }
-
-        const productData = data.product;
-        if (isCurrentRequest) {
-          setRequest({
-            id,
-            error: "",
-            product: {
-              ...productData,
-              id: String(productData.id),
-              description: productData.description || "",
-              category: productData.category || "",
-              image: productData.image_url || "",
-              price: Number(productData.price),
-              stock: Number(productData.stock),
-            },
-          });
-        }
-      } catch (requestError) {
-        if (isCurrentRequest) {
-          setRequest({
-            id,
-            product: null,
-            error: requestError.message || "Could not load this product.",
-          });
-        }
-      }
-    }
-
-    loadProduct();
-
-    return () => {
-      isCurrentRequest = false;
-    };
-  }, [id]);
 
   async function handleDelete() {
     if (!product) return;
@@ -92,7 +43,7 @@ function ProductDetailsPage() {
   }
 
   if (loading && !product) {
-    return <p className="py-12 text-center text-sm text-gray-500 dark:text-gray-400">Loading product…</p>;
+    return <p className="py-12 text-center text-sm text-gray-500 dark:text-gray-400">Loading product details…</p>;
   }
 
   if (!product) {
@@ -103,7 +54,7 @@ function ProductDetailsPage() {
           {error ? "Could not load product" : "Product not found"}
         </h1>
         <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
-          {error || "This product may have been removed."}
+          {error || "This product may have been deleted or the link may be incorrect."}
         </p>
         <Link
           to="/products"
@@ -120,7 +71,7 @@ function ProductDetailsPage() {
     <section className="mx-auto max-w-5xl">
       <Link
         to="/products"
-        className="mb-5 inline-flex items-center gap-2 text-sm font-medium text-gray-500 transition hover:text-emerald-700 dark:text-gray-400 dark:hover:text-emerald-400"
+        className="mb-2 inline-flex min-h-10 items-center gap-2 text-sm font-medium text-gray-500 transition hover:text-emerald-700 dark:text-gray-400 dark:hover:text-emerald-400 sm:mb-5 sm:min-h-11"
       >
         <ArrowLeft size={16} />
         Back to products
@@ -134,21 +85,21 @@ function ProductDetailsPage() {
 
       <article className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-gray-800 dark:bg-gray-900">
         <div className="grid gap-0 md:grid-cols-2">
-          <div className="flex min-h-72 items-center justify-center bg-gray-50 p-6 dark:bg-gray-800/70 sm:min-h-96 sm:p-10">
+          <div className="flex min-h-40 items-center justify-center bg-gray-50 p-3 dark:bg-gray-800/70 sm:min-h-96 sm:p-10">
             {product.image ? (
               <img
                 src={product.image}
                 alt={product.name}
-                className="max-h-[28rem] w-full rounded-xl object-contain"
+                className="max-h-36 w-full rounded-xl object-contain sm:max-h-[28rem]"
               />
             ) : (
-              <div className="flex h-60 w-full items-center justify-center rounded-xl bg-gray-100 text-gray-400 dark:bg-gray-800 dark:text-gray-500">
+              <div className="flex h-32 w-full items-center justify-center rounded-xl bg-gray-100 text-gray-400 dark:bg-gray-800 dark:text-gray-500 sm:h-60">
                 <Package size={56} strokeWidth={1.25} />
               </div>
             )}
           </div>
 
-          <div className="flex flex-col p-5 sm:p-8">
+          <div className="flex flex-col p-3 sm:p-8">
             <div className="flex-1">
               {product.category && (
                 <p className="text-sm font-medium text-emerald-700 dark:text-emerald-400">
@@ -158,12 +109,12 @@ function ProductDetailsPage() {
               <h1 className="mt-1 text-2xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-3xl">
                 {product.name}
               </h1>
-              <p className="mt-3 text-2xl font-semibold text-gray-900 dark:text-gray-100">
+              <p className="mt-2 text-xl font-semibold text-gray-900 dark:text-gray-100 sm:mt-3 sm:text-2xl">
                 {currency.format(product.price)}
               </p>
 
               <span
-                className={`mt-4 inline-flex items-center gap-2 rounded-full px-3 py-1 text-sm font-medium ${
+                className={`mt-3 inline-flex items-center gap-2 rounded-full px-3 py-1 text-sm font-medium sm:mt-4 ${
                   product.stock > 0
                     ? "bg-emerald-50 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300"
                     : "bg-red-50 text-red-700 dark:bg-red-950 dark:text-red-300"
@@ -177,16 +128,16 @@ function ProductDetailsPage() {
                 {product.stock > 0 ? "In stock" : "Out of stock"}
               </span>
 
-              <div className="mt-7">
+              <div className="mt-4 sm:mt-7">
                 <h2 className="text-sm font-semibold text-gray-900 dark:text-gray-100">
-                  Description
+                  Product description
                 </h2>
-                <p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-gray-600 dark:text-gray-300">
-                  {product.description || "No description has been added."}
+                <p className="mt-1.5 whitespace-pre-wrap text-sm leading-5 sm:mt-2 sm:leading-6 text-gray-600 dark:text-gray-300">
+                  {product.description || "No description is available for this product."}
                 </p>
               </div>
 
-              <div className="mt-8 grid grid-cols-2 gap-4 border-y border-gray-100 py-5 dark:border-gray-800">
+              <div className="mt-4 grid grid-cols-2 gap-3 border-y border-gray-100 py-3 dark:border-gray-800 sm:mt-8 sm:gap-4 sm:py-5">
                 <DetailMeta
                   icon={<Layers3 size={17} />}
                   label="Category"
@@ -199,16 +150,16 @@ function ProductDetailsPage() {
                 />
                 <DetailMeta
                   icon={<CalendarDays size={17} />}
-                  label="Added"
+                  label="Date added"
                   value={formatDate(product.created_at)}
                 />
               </div>
             </div>
 
-            <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+            <div className="mt-4 grid grid-cols-2 gap-2 sm:mt-6 sm:flex sm:gap-3">
               <Link
                 to={`/products/${product.id}/edit`}
-                className="inline-flex flex-1 items-center justify-center gap-2 rounded-lg bg-emerald-700 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-emerald-800"
+                className="inline-flex min-h-11 items-center justify-center gap-1 rounded-lg bg-emerald-700 px-2 py-2 text-xs font-semibold text-white transition hover:bg-emerald-800 sm:flex-1 sm:gap-2 sm:px-4 sm:text-sm"
               >
                 <Pencil size={16} />
                 Edit product
@@ -217,7 +168,7 @@ function ProductDetailsPage() {
                 type="button"
                 onClick={handleDelete}
                 disabled={isDeleting}
-                className="inline-flex flex-1 items-center justify-center gap-2 rounded-lg border border-red-200 px-4 py-2.5 text-sm font-semibold text-red-700 transition hover:bg-red-50 disabled:opacity-60 dark:border-red-900 dark:text-red-300 dark:hover:bg-red-950"
+                className="inline-flex min-h-11 items-center justify-center gap-1 rounded-lg border border-red-200 px-2 py-2 text-xs font-semibold text-red-700 transition hover:bg-red-50 disabled:opacity-60 dark:border-red-900 dark:text-red-300 dark:hover:bg-red-950 sm:flex-1 sm:gap-2 sm:px-4 sm:text-sm"
               >
                 <Trash2 size={16} />
                 {isDeleting ? "Deleting…" : "Delete product"}

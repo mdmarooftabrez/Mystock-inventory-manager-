@@ -24,7 +24,7 @@ function AddProductPage() {
     <section className="mx-auto max-w-4xl">
       <Link
         to="/products"
-        className="mb-5 inline-flex items-center gap-2 text-sm font-medium text-gray-500 transition hover:text-emerald-700 dark:text-gray-400 dark:hover:text-emerald-400"
+        className="mb-2 inline-flex min-h-10 items-center gap-2 text-sm font-medium text-gray-500 transition hover:text-emerald-700 dark:text-gray-400 dark:hover:text-emerald-400 sm:mb-5 sm:min-h-11"
       >
         <ArrowLeft size={16} />
         Back to products

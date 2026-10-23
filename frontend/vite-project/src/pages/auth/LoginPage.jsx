@@ -26,17 +26,15 @@ function LoginPage() {
   }
 
   return (
-    <main className="grid min-h-screen place-items-center bg-gray-50 px-4 py-10">
-      <section className="w-full max-w-md rounded-2xl border border-gray-200 bg-white p-6 shadow-sm sm:p-8">
-        <Link to="/login" className="inline-flex" aria-label="MyStock sign in">
-          <Brand />
-        </Link>
-        <h1 className="mt-8 text-2xl font-bold text-gray-900">Welcome back</h1>
-        <p className="mt-2 text-sm text-gray-600">Log in to manage your product list and stock.</p>
+    <main className="grid min-h-screen place-items-center bg-gray-50 px-3 py-6 sm:px-4 sm:py-10">
+      <section className="w-full max-w-md rounded-2xl border border-gray-200 bg-white p-5 shadow-sm sm:p-8">
+        <Brand />
+        <h1 className="mt-6 text-2xl font-bold text-gray-900 sm:mt-8">Welcome back</h1>
+        <p className="mt-2 text-sm text-gray-600">Sign in to view and manage your inventory.</p>
 
-        <form onSubmit={handleSubmit} className="mt-7 space-y-5">
+        <form onSubmit={handleSubmit} className="mt-6 space-y-4 sm:mt-7 sm:space-y-5">
           <div>
-            <label htmlFor="email" className="mb-1.5 block text-sm font-medium text-gray-700">
+            <label htmlFor="email" className="mb-1.5 block text-sm font-semibold text-gray-900">
               Email address
             </label>
             <input
@@ -44,14 +42,15 @@ function LoginPage() {
               name="email"
               type="email"
               autoComplete="email"
+              placeholder="Enter your email"
               required
               value={email}
               onChange={(event) => setEmail(event.target.value)}
-              className="w-full rounded-lg border border-gray-300 px-3.5 py-2.5 text-sm outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100"
+              className="w-full rounded-lg border border-gray-400 bg-white px-3.5 py-2.5 text-sm text-gray-950 outline-none placeholder:text-gray-500 focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100"
             />
           </div>
           <div>
-            <label htmlFor="password" className="mb-1.5 block text-sm font-medium text-gray-700">
+            <label htmlFor="password" className="mb-1.5 block text-sm font-semibold text-gray-900">
               Password
             </label>
             <input
@@ -59,10 +58,11 @@ function LoginPage() {
               name="password"
               type="password"
               autoComplete="current-password"
+              placeholder="Enter your password"
               required
               value={password}
               onChange={(event) => setPassword(event.target.value)}
-              className="w-full rounded-lg border border-gray-300 px-3.5 py-2.5 text-sm outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100"
+              className="w-full rounded-lg border border-gray-400 bg-white px-3.5 py-2.5 text-sm text-gray-950 outline-none placeholder:text-gray-500 focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100"
             />
           </div>
           {error && <p role="alert" className="rounded-lg bg-red-50 px-3.5 py-3 text-sm text-red-700">{error}</p>}

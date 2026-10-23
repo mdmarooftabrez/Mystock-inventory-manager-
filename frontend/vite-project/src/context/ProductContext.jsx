@@ -1,19 +1,8 @@
-import { useContext, useEffect, useState } from "react";
-import API_URL from "../api/api";
+import { useCallback, useContext, useEffect, useState } from "react";
+import { apiRequest } from "../api/api";
+import { formatProduct } from "../utils/product";
 import AuthContext from "./auth-context";
 import ProductContext from "./product-context";
-
-function formatProduct(product) {
-  return {
-    ...product,
-    id: String(product.id),
-    description: product.description || "",
-    category: product.category || "",
-    image: product.image_url || "",
-    price: Number(product.price),
-    stock: Number(product.stock),
-  };
-}
 
 export function ProductProvider({ children }) {
   const { user, loading } = useContext(AuthContext);
@@ -25,58 +14,48 @@ export function ProductProvider({ children }) {
   const [refreshCount, setRefreshCount] = useState(0);
   const [productsUserId, setProductsUserId] = useState(null);
 
+  const loadProducts = useCallback(() => {
+    setProductsLoading(true);
+    setError("");
+    setRefreshCount((count) => count + 1);
+  }, []);
+
   useEffect(() => {
-    if (loading) return;
+    if (loading || !user) return;
 
-    if (!user) return;
+    let isCurrent = true;
 
-    async function getProducts() {
-      setError("");
-
+    async function fetchProducts() {
       try {
-        const response = await fetch(`${API_URL}/products`, {
-          credentials: "include",
-        });
-        const data = await response.json();
+        const data = await apiRequest("/products");
 
-        if (!response.ok) {
-          throw new Error(data.message || "Could not load products.");
+        if (isCurrent) {
+          setProducts(data.products.map(formatProduct));
+          setProductsUserId(user.id);
         }
-
-        setProducts(data.products.map(formatProduct));
-        setProductsUserId(user.id);
       } catch (requestError) {
-        setProducts([]);
-        setProductsUserId(user.id);
-        setError(requestError.message || "Could not load products.");
+        if (isCurrent) {
+          setProducts([]);
+          setProductsUserId(user.id);
+          setError(requestError.message);
+        }
       } finally {
-        setProductsLoading(false);
+        if (isCurrent) setProductsLoading(false);
       }
     }
 
-    getProducts();
-  }, [loading, user, refreshCount]);
+    fetchProducts();
 
-  function loadProducts() {
-    setProductsLoading(true);
-    setRefreshCount((count) => count + 1);
-  }
+    return () => {
+      isCurrent = false;
+    };
+  }, [loading, user, refreshCount]);
 
   async function createProduct(formData) {
     setSaving(true);
 
     try {
-      const response = await fetch(`${API_URL}/products`, {
-        method: "POST",
-        credentials: "include",
-        body: formData,
-      });
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || "Could not create this product.");
-      }
-
+      const data = await apiRequest("/products", { method: "POST", body: formData });
       const newProduct = formatProduct(data.product);
 
       setProducts((currentProducts) => [newProduct, ...currentProducts]);
@@ -90,17 +69,7 @@ export function ProductProvider({ children }) {
     setSaving(true);
 
     try {
-      const response = await fetch(`${API_URL}/products/${id}`, {
-        method: "PUT",
-        credentials: "include",
-        body: formData,
-      });
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || "Could not update this product.");
-      }
-
+      const data = await apiRequest(`/products/${id}`, { method: "PUT", body: formData });
       const updatedProduct = formatProduct(data.product);
 
       setProducts((currentProducts) => currentProducts.map((product) =>
@@ -117,15 +86,7 @@ export function ProductProvider({ children }) {
     setDeletingId(String(id));
 
     try {
-      const response = await fetch(`${API_URL}/products/${id}`, {
-        method: "DELETE",
-        credentials: "include",
-      });
-
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.message || "Could not delete this product.");
-      }
+      await apiRequest(`/products/${id}`, { method: "DELETE" });
 
       setProducts((currentProducts) =>
         currentProducts.filter((product) => product.id !== String(id)),

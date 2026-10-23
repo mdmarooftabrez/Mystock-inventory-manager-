@@ -8,7 +8,7 @@ const desktopLinkClass = (active) =>
   }`;
 
 const mobileLinkClass = (active) =>
-  `flex flex-col items-center gap-1 px-1 py-2 text-[11px] font-medium transition ${
+  `flex flex-col items-center gap-0.5 px-1 py-1.5 text-[10px] font-medium transition ${
     active ? "text-emerald-700 dark:text-emerald-400" : "text-gray-500 dark:text-gray-400"
   }`;
 
@@ -18,11 +18,11 @@ function Sidebar({ user, onLogout }) {
   return (
     <>
       <aside className="fixed inset-y-0 left-0 z-30 hidden w-64 flex-col bg-[#061c19] px-4 py-5 text-white sm:flex">
-        <NavLink to="/products" className="mb-10 px-2" aria-label="MyStock home">
+        <NavLink to="/products" className="mb-10 px-2">
           <Brand />
         </NavLink>
 
-        <nav aria-label="Main navigation" className="flex flex-col gap-2">
+        <nav className="flex flex-col gap-2">
           <NavLink to="/" end className={({ isActive }) => desktopLinkClass(isActive)}>
             <House size={19} /><span>Home</span>
           </NavLink>
@@ -36,7 +36,7 @@ function Sidebar({ user, onLogout }) {
 
         <div className="mt-auto border-t border-emerald-900 pt-5">
           <div className="mb-4 flex items-center gap-3 px-2">
-            <div className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-emerald-800 text-sm font-bold" aria-hidden="true">
+            <div className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-emerald-800 text-sm font-bold">
               {initials}
             </div>
             <div className="min-w-0">
@@ -51,20 +51,19 @@ function Sidebar({ user, onLogout }) {
       </aside>
 
       <nav
-        aria-label="Mobile navigation"
-        className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-4 border-t border-gray-200 bg-white/95 px-2 pb-[env(safe-area-inset-bottom)] pt-1 backdrop-blur dark:border-gray-800 dark:bg-gray-900/95 sm:hidden"
+        className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-4 border-t border-gray-200 bg-white/95 px-3 pb-[env(safe-area-inset-bottom)] pt-1 backdrop-blur dark:border-gray-800 dark:bg-gray-900/95 sm:hidden"
       >
         <NavLink to="/" end className={({ isActive }) => mobileLinkClass(isActive)}>
-          <House size={20} /><span>Home</span>
+          <House size={18} /><span>Home</span>
         </NavLink>
         <NavLink to="/products" end className={({ isActive }) => mobileLinkClass(isActive)}>
-          <Package size={20} /><span>Products</span>
+          <Package size={18} /><span>Products</span>
         </NavLink>
         <NavLink to="/products/new" end className={({ isActive }) => mobileLinkClass(isActive)}>
-          <Plus size={21} /><span>Add</span>
+          <Plus size={19} /><span>Add</span>
         </NavLink>
         <button type="button" onClick={onLogout} className={mobileLinkClass(false)}>
-          <LogOut size={20} /><span>Log out</span>
+          <LogOut size={18} /><span>Log out</span>
         </button>
       </nav>
     </>

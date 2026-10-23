@@ -50,7 +50,7 @@ function DashboardLayout({ children }) {
           onToggleDarkMode={() => setDarkMode(!darkMode)}
         />
 
-        <main className="min-h-0 flex-1 overflow-y-auto px-4 pb-24 pt-5 sm:px-6 sm:pb-6 sm:pt-7">
+        <main className="min-h-0 flex-1 overflow-y-auto px-4 pb-[calc(4rem_+_env(safe-area-inset-bottom))] pt-4 sm:px-6 sm:pb-6 sm:pt-7">
           {children}
         </main>
       </div>

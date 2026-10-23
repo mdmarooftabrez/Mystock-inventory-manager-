@@ -26,7 +26,7 @@ async function getImageUrl(request, currentImage = null) {
 export async function createProduct(request, response) {
   try {
     const { name, description, price, stock, category } = request.body;
-    const product = await insertProduct({
+    const product = await insertProduct(request.user.userId, {
       name: name.trim(),
       description: description?.trim() || null,
       price: Number(price),
@@ -51,7 +51,7 @@ export async function createProduct(request, response) {
 
 export async function handleGetAllProducts(request, response) {
   try {
-    const products = await getAllProducts();
+    const products = await getAllProducts(request.user.userId);
     return response.json({
       success: true,
       count: products.length,
@@ -77,7 +77,7 @@ export async function handleGetProductById(request, response) {
       });
     }
 
-    const product = await getProductById(id);
+    const product = await getProductById(request.user.userId, id);
 
     if (!product) {
       return response.status(404).json({
@@ -111,7 +111,7 @@ export async function handleUpdateProduct(request, response) {
     }
 
     const { name, price, stock, description, category } = request.body;
-    const currentProduct = await getProductById(id);
+    const currentProduct = await getProductById(request.user.userId, id);
 
     if (!currentProduct) {
       return response.status(404).json({
@@ -120,7 +120,7 @@ export async function handleUpdateProduct(request, response) {
       });
     }
 
-    const product = await updateProductById(id, {
+    const product = await updateProductById(request.user.userId, id, {
       name: name.trim(),
       description: description?.trim() || null,
       price: Number(price),
@@ -154,7 +154,7 @@ export async function handleDeleteProductById(request, response) {
       });
     }
 
-    const product = await deleteProductById(id);
+    const product = await deleteProductById(request.user.userId, id);
 
     if (!product) {
       return response.status(404).json({

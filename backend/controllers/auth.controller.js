@@ -22,13 +22,20 @@ function setLoginCookie(response, user) {
 
 export async function registerUser(request, response) {
   const { name: formName, email: formEmail, password } = request.body;
-  const name = formName?.trim();
+  const name = typeof formName === "string" ? formName.trim() : "";
   const email = formEmail?.trim().toLowerCase();
 
-  if (!name || !email || !password) {
+  if (!name || !email || typeof password !== "string" || !password) {
     return response.status(400).json({
       success: false,
       message: "Name, email, and password are required.",
+    });
+  }
+
+  if (password.length < 8) {
+    return response.status(400).json({
+      success: false,
+      message: "Password must be at least 8 characters long.",
     });
   }
 
