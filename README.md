@@ -53,7 +53,7 @@ The backend reads settings from `backend/.env` when you run it locally. Set the 
 | --- | --- |
 | `PORT` | Port for the API. The hosting service may set this for you. |
 | `NODE_ENV` | Use `production` on the hosted API. |
-| `FRONTEND_URL` | Full address of the deployed frontend, such as `https://mystock.example.com`. |
+| `FRONTEND_URL` | Frontend origin allowed to call the API and make state-changing requests, such as `https://mystock.example.com` (no path or trailing slash). |
 | `JWT_SECRET` | A long, random secret used to sign login tokens. Keep it private. |
 | `DATABASE_URL` | Connection string from your hosted PostgreSQL database. |
 | `IMAGEKIT_PRIVATE_KEY` | Optional private key for image uploads. |
@@ -61,6 +61,8 @@ The backend reads settings from `backend/.env` when you run it locally. Set the 
 Set `DATABASE_URL` to your Neon connection string. Never put private keys or database passwords in the frontend environment; variables starting with `VITE_` are included in the built website.
 
 The frontend uses `VITE_API_URL`. Set it to your deployed API address followed by `/api`, for example `https://mystock-api.example.com/api`.
+
+The API checks the `Origin` header on state-changing requests and accepts the configured `FRONTEND_URL`. Keep this set to the exact production frontend origin. Vercel preview URLs are not accepted unless you deploy with that URL configured.
 
 ## Connect to Neon
 
@@ -87,6 +89,7 @@ Create a **Web Service** and set:
 Add these environment variables in Render:
 
 - `NODE_ENV` = `production`
+- `FRONTEND_URL` = the Vercel production frontend origin, such as `https://mystock.example.com` (no path or trailing slash)
 - `DATABASE_URL` = your Neon connection string
 - `JWT_SECRET` = a long, random secret
 - `IMAGEKIT_PRIVATE_KEY` = optional, only needed for image uploads
@@ -105,7 +108,7 @@ Import the same GitHub repository into Vercel and set:
 
 The included `vercel.json` rewrite sends React Router paths back to the app, so pages such as `/products` continue to work when opened directly or refreshed.
 
-After Vercel assigns a URL, add `FRONTEND_URL` to the Render backend using that exact URL, then redeploy the backend so browser requests are allowed. If you use a custom domain, set `FRONTEND_URL` to that domain instead. Keep database passwords and secret keys out of GitHub. Both deployed services use HTTPS, which is needed for login cookies.
+After Vercel assigns a production URL, set `FRONTEND_URL` in Render to that exact origin, then redeploy the backend. If you use a custom domain, set it to the custom frontend origin instead. Keep database passwords and secret keys out of GitHub. Both deployed services use HTTPS, which is needed for login cookies.
 
 ## Project files
 
