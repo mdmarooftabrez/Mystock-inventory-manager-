@@ -18,14 +18,14 @@ function ProductCard({ product, onDelete, deleting = false }) {
       <Link
         to={`/products/${product.id}`}
         title={`View ${product.name}`}
-        className="relative block aspect-[4/3] w-full overflow-hidden bg-gray-50 dark:bg-gray-800"
+        className="relative block aspect-4/3 w-full overflow-hidden bg-gray-50 dark:bg-gray-800"
       >
         {imageIsAvailable ? (
           <img
             src={product.image}
             alt={product.name}
             loading="lazy"
-            className="absolute inset-0 h-full w-full object-contain transition duration-300"
+            className="absolute inset-0 h-full w-full object-cover transition duration-300"
             onError={() => setFailedImageUrl(product.image)}
           />
         ) : (
