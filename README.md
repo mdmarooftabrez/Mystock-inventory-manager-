@@ -60,7 +60,7 @@ The backend reads settings from `backend/.env` when you run it locally. Set the 
 
 Set `DATABASE_URL` to your Neon connection string. Never put private keys or database passwords in the frontend environment; variables starting with `VITE_` are included in the built website.
 
-The frontend uses `VITE_API_URL`. Set it to your deployed API address followed by `/api`, for example `https://mystock-api.example.com/api`.
+The frontend uses `VITE_API_URL`. In production, set it to `/api`; Vercel forwards those requests to the Render API, so the browser sends the login cookie to the Vercel site.
 
 The API checks the `Origin` header on state-changing requests and accepts the configured `FRONTEND_URL`. Keep this set to the exact production frontend origin. Vercel preview URLs are not accepted unless you deploy with that URL configured.
 
@@ -104,9 +104,9 @@ Import the same GitHub repository into Vercel and set:
 - Framework Preset: `Vite`
 - Build Command: `npm run build`
 - Output Directory: `dist`
-- Environment Variable: `VITE_API_URL` = the Render backend URL followed by `/api`, such as `https://your-mystock-api.onrender.com/api`
+- Environment Variable: `VITE_API_URL` = `/api`
 
-The included `vercel.json` rewrite sends React Router paths back to the app, so pages such as `/products` continue to work when opened directly or refreshed.
+The included `vercel.json` forwards `/api/*` requests to the Render backend and sends React Router paths back to the app, so login cookies stay on the Vercel site and pages such as `/products` continue to work when opened directly or refreshed.
 
 After Vercel assigns a production URL, set `FRONTEND_URL` in Render to that exact origin, then redeploy the backend. If you use a custom domain, set it to the custom frontend origin instead. Keep database passwords and secret keys out of GitHub. Both deployed services use HTTPS, which is needed for login cookies.
 
