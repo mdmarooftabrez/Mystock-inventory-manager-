@@ -18,19 +18,19 @@ function ProductCard({ product, onDelete, deleting = false }) {
       <Link
         to={`/products/${product.id}`}
         title={`View ${product.name}`}
-        className="flex  w-full items-center justify-center overflow-hidden bg-gray-50 dark:bg-gray-800"
+        className="relative block aspect-[4/3] w-full overflow-hidden bg-gray-50 dark:bg-gray-800"
       >
         {imageIsAvailable ? (
           <img
             src={product.image}
             alt={product.name}
             loading="lazy"
-            className="block h-full w-full object-contain transition duration-300"
+            className="absolute inset-0 h-full w-full object-contain transition duration-300"
             onError={() => setFailedImageUrl(product.image)}
           />
         ) : (
-          <span className="flex h-full items-center justify-center text-gray-300 dark:text-gray-600">
-            <ImageIcon size={34} strokeWidth={1.4} />
+          <span className="absolute inset-0 flex items-center justify-center text-gray-300 dark:text-gray-600">
+            <ImageIcon size={44} strokeWidth={1.4} />
           </span>
         )}
       </Link>
