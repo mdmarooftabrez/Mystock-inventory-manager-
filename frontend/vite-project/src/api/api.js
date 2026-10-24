@@ -1,4 +1,6 @@
-const API_URL = import.meta.env.VITE_API_URL || "/api";
+const API_URL = import.meta.env.PROD
+  ? "/api"
+  : import.meta.env.VITE_API_URL || "http://localhost:5000/api";
 
 export async function apiRequest(path, { method = "GET", body } = {}) {
   const options = {
@@ -6,11 +8,10 @@ export async function apiRequest(path, { method = "GET", body } = {}) {
     credentials: "include",
   };
 
-  if (body instanceof FormData) {
-    options.body = body;
-  } else if (body !== undefined) {
-    options.headers = { "Content-Type": "application/json" };
-    options.body = JSON.stringify(body);
+  if (body !== undefined) {
+    const isFormData = body instanceof FormData;
+    if (!isFormData) options.headers = { "Content-Type": "application/json" };
+    options.body = isFormData ? body : JSON.stringify(body);
   }
 
   const response = await fetch(`${API_URL}${path}`, options);
