@@ -85,15 +85,15 @@ function ProductDetailsPage() {
 
       <article className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-gray-800 dark:bg-gray-900">
         <div className="grid gap-0 md:grid-cols-2">
-          <div className="flex min-h-40 items-center justify-center bg-gray-50 p-3 dark:bg-gray-800/70 sm:min-h-96 sm:p-10">
+          <div className="relative min-h-40 overflow-hidden bg-gray-50 dark:bg-gray-800/70 sm:min-h-96">
             {product.image ? (
               <img
                 src={product.image}
                 alt={product.name}
-                className="max-h-36 w-full rounded-xl object-contain sm:max-h-[28rem]"
+                className="absolute inset-0 h-full w-full object-cover object-center"
               />
             ) : (
-              <div className="flex h-32 w-full items-center justify-center rounded-xl bg-gray-100 text-gray-400 dark:bg-gray-800 dark:text-gray-500 sm:h-60">
+              <div className="absolute inset-0 flex items-center justify-center bg-gray-100 text-gray-400 dark:bg-gray-800 dark:text-gray-500">
                 <Package size={56} strokeWidth={1.25} />
               </div>
             )}

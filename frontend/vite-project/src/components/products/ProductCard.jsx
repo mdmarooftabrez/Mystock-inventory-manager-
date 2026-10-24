@@ -25,7 +25,7 @@ function ProductCard({ product, onDelete, deleting = false }) {
             src={product.image}
             alt={product.name}
             loading="lazy"
-            className="absolute inset-0 h-full w-full object-cover transition duration-300"
+            className="absolute inset-0 h-full w-full object-cover object-center transition duration-300"
             onError={() => setFailedImageUrl(product.image)}
           />
         ) : (
